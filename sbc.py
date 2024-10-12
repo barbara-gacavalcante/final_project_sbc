@@ -34,17 +34,23 @@ y = tabela["score_credito"]
 x = tabela.drop(columns=["score_credito", "id_cliente"], axis=1)
 x_treino, x_teste, y_treino, y_teste = train_test_split(x, y, test_size=0.3, random_state=1)
 
-# Treinar o modelo
-modelo_arvoredecisao = RandomForestClassifier()
-modelo_knn = KNeighborsClassifier()
+@st.cache_resource
+def train_models():
+    modelo_arvoredecisao = RandomForestClassifier()
+    modelo_knn = KNeighborsClassifier()
 
-modelo_arvoredecisao.fit(x_treino, y_treino)
-modelo_knn.fit(x_treino, y_treino)
+    modelo_arvoredecisao.fit(x_treino, y_treino)
+    modelo_knn.fit(x_treino, y_treino)
+
+    return modelo_arvoredecisao, modelo_knn
+
+modelo_arvoredecisao, modelo_knn = train_models()
 
 st.write("### Precisão dos modelos")
 previsao_arvoredecisao = modelo_arvoredecisao.predict(x_teste)
 previsao_knn = modelo_knn.predict(x_teste)
 
+# MOSTRANDO A ACURÁCIA DOS MODELOS EM DUAS COLUNAS BONITINHAS
 col1, col2 = st.columns(2)
 with col1:
     st.metric("###### Acurácia da árvore de decisão", value=accuracy_score(y_teste, previsao_arvoredecisao))
@@ -52,6 +58,8 @@ with col1:
 with col2:
     st.metric("###### Acurácia do modelo k-nearest  neighboors", value=accuracy_score(y_teste, previsao_knn))
 
+
+# PREVISÕES DOS NOVOS CLIENTE
 st.title("Novas previsões")
 novos_clientes = load_data("novos_clientes.csv")
 
@@ -61,8 +69,13 @@ for coluna in novos_clientes.columns:
 
 previsao = modelo_arvoredecisao.predict(novos_clientes)
 st.write(novos_clientes)
-st.write(previsao)
 
+colunas = st.columns(len(previsao))
+for i, resultado in enumerate(previsao):
+    with colunas[i]:
+        st.metric(f"Resultado {i+1}", value=resultado)
+
+# TESTAR O CRÉDITO DE UM NOVO CLIENTE
 st.title("Avaliar cliente")
 with st.form(key='adicionar_cliente'):
     mes = st.number_input("Mês", min_value=1, max_value=12, value=1)
@@ -121,15 +134,17 @@ if submit_button:
         'emprestimo_estudantil': emprestimo_estudantil
     }
 
+
     df_novo_cliente = pd.DataFrame([dados_cliente])
     for coluna in df_novo_cliente.columns:
         if df_novo_cliente[coluna].dtype == "object" and coluna != "score_credito":
             df_novo_cliente[coluna] = codificador.fit_transform(df_novo_cliente[coluna])
     
     # Exibir o DataFrame
-    st.write("### Novo Cliente Adicionado:")
+    st.write("### Avaliação do Cliente:")
     st.write(df_novo_cliente)
     previsao = modelo_arvoredecisao.predict(df_novo_cliente)
-    st.write(previsao)
+
+    st.metric(label="Previsão de Score de Crédito", value=previsao[0])
 
 
