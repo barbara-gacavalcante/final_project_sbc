@@ -56,24 +56,29 @@ with col1:
     st.metric("###### Acurácia da árvore de decisão", value=accuracy_score(y_teste, previsao_arvoredecisao))
 
 with col2:
-    st.metric("###### Acurácia do modelo k-nearest  neighboors", value=accuracy_score(y_teste, previsao_knn))
+    st.metric("###### Acurácia do modelo k-nearest neighbors", value=accuracy_score(y_teste, previsao_knn))
 
-
-# PREVISÕES DOS NOVOS CLIENTE
 st.title("Novas previsões")
-novos_clientes = load_data("novos_clientes.csv")
+# PREVISÕES DOS NOVOS CLIENTE
+with st.expander("Novas previsões"):
+    novos_clientes = load_data("novos_clientes.csv")
 
-for coluna in novos_clientes.columns:
-    if novos_clientes[coluna].dtype == "object" and coluna != "score_credito":
-        novos_clientes[coluna] = codificador.fit_transform(novos_clientes[coluna])
+    st.write("### Novos Dados dos Clientes:")
+    st.write(novos_clientes)
 
-previsao = modelo_arvoredecisao.predict(novos_clientes)
-st.write(novos_clientes)
+    for coluna in novos_clientes.columns:
+        if novos_clientes[coluna].dtype == "object" and coluna != "score_credito":
+            novos_clientes[coluna] = codificador.fit_transform(novos_clientes[coluna])
 
-colunas = st.columns(len(previsao))
-for i, resultado in enumerate(previsao):
-    with colunas[i]:
-        st.metric(f"Resultado {i+1}", value=resultado)
+    previsao = modelo_arvoredecisao.predict(novos_clientes)
+    st.write("### Novos Dados dos Clientes Codificados:")
+    st.write(novos_clientes)
+
+    colunas = st.columns(len(previsao))
+
+    for i, resultado in enumerate(previsao):
+        with colunas[i]:
+            st.metric(f"Resultado {i+1}", value=resultado)
 
 # TESTAR O CRÉDITO DE UM NOVO CLIENTE
 st.title("Avaliar cliente")
