@@ -104,7 +104,8 @@ with st.expander("Adicionar um novo cliente"):
         investimento_mensal = st.number_input("Investimento Mensal", min_value=0.0, value=0.0)
         comportamento_pagamento = st.selectbox("Comportamento de Pagamento", 
                                             ["baixo_gasto_pagamento_baixo", "baixo_gasto_pagamento_medio", 
-                                                "baixo_gasto_pagamento_alto"])
+                                                "baixo_gasto_pagamento_alto","alto_gasto_pagamento_baixos", 
+                                                "alto_gasto_pagamento_medio", "alto_gasto_pagamento_alto"])
         saldo_final_mes = st.number_input("Saldo Final do Mês", min_value=0.0, value=0.0)
         emprestimo_carro = st.number_input("Emprestimo - Carro", min_value=0, max_value=1, value=0)
         emprestimo_casa = st.number_input("Emprestimo - Casa", min_value=0, max_value=1, value=0)
