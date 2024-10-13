@@ -158,19 +158,13 @@ with st.expander("Adicionar um novo cliente"):
             if df_novo_cliente[coluna].dtype == "object" and coluna != "score_credito":
                 df_novo_cliente[coluna] = codificador.fit_transform(df_novo_cliente[coluna])
         
-        previsao = modelo_arvoredecisao.predict(df_novo_cliente)
-        
         st.write("### Avaliação do Cliente:")
         st.write(df_novo_cliente)
-        previsao = modelo_arvoredecisao.predict(df_novo_cliente)
 
         st.metric(label="Previsão de Score de Crédito", value=previsao[0])
-
-        previsao = modelo_arvoredecisao.predict(df_novo_cliente)
 
         # Gerar explicação usando LIME
         explicacao = explicador.explain_instance(df_novo_cliente.iloc[0].values, modelo_arvoredecisao.predict_proba)
 
         st.write("### Explicação da Previsão com LIME:")
         components.html(explicacao.as_html(), height=500)
-        st.pyplot(explicacao.as_pyplot_figure())
