@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
+from lime import lime_tabular
+
 
 
 st.title("Previsão de Crédito")
@@ -33,6 +35,14 @@ st.write(tabela.head(10))
 y = tabela["score_credito"]
 x = tabela.drop(columns=["score_credito", "id_cliente"], axis=1)
 x_treino, x_teste, y_treino, y_teste = train_test_split(x, y, test_size=0.3, random_state=1)
+
+explicador = lime_tabular.LimeTabularExplainer(
+    x_treino.values,  # Dados de treinamento
+    feature_names=x.columns,  # Nomes das colunas
+    class_names=['Poor', 'Standard', 'Good'],  # Classes de saída
+    verbose=True,
+    mode='classification'
+)
 
 @st.cache_resource
 def train_models():
@@ -147,11 +157,23 @@ with st.expander("Adicionar um novo cliente"):
             if df_novo_cliente[coluna].dtype == "object" and coluna != "score_credito":
                 df_novo_cliente[coluna] = codificador.fit_transform(df_novo_cliente[coluna])
         
-        # Exibir o DataFrame
+        previsao = modelo_arvoredecisao.predict(df_novo_cliente)
+        
         st.write("### Avaliação do Cliente:")
         st.write(df_novo_cliente)
         previsao = modelo_arvoredecisao.predict(df_novo_cliente)
 
         st.metric(label="Previsão de Score de Crédito", value=previsao[0])
 
+        previsao = modelo_arvoredecisao.predict(df_novo_cliente)
 
+        # Gerar explicação usando LIME
+        explicacao = explicador.explain_instance(df_novo_cliente.iloc[0].values, modelo_arvoredecisao.predict_proba)
+
+        st.write("### Explicação da Previsão com LIME:")
+
+        #st.markdown(explicacao.as_html(), unsafe_allow_html=True)
+
+        explicacao_list = explicacao.as_list()
+        for feature, weight in explicacao_list:
+            st.write(f"{feature}: {weight}")
