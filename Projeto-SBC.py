@@ -90,11 +90,6 @@ with st.expander("Novas previsões"):
     for i, resultado in enumerate(previsao):
         with colunas[i]:
             st.metric(f"Resultado {i+1}", value=resultado)
-    
-    explicacao = explicador.explain_instance(novos_clientes.iloc[0].values, modelo_arvoredecisao.predict_proba)
-
-    st.write("### Explicação da Previsão com LIME:")
-    components.html(explicacao.as_html(), height=800)
 
 # TESTAR O CRÉDITO DE UM NOVO CLIENTE
 st.title("Avaliar cliente")
@@ -177,4 +172,5 @@ with st.expander("Adicionar um novo cliente"):
         explicacao = explicador.explain_instance(df_novo_cliente.iloc[0].values, modelo_arvoredecisao.predict_proba)
 
         st.write("### Explicação da Previsão com LIME:")
-        components.html(explicacao.as_html(), height=800)
+        components.html(explicacao.as_html(), height=500)
+        st.pyplot(explicacao.as_pyplot_figure())
