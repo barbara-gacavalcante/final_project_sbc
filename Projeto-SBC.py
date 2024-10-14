@@ -40,7 +40,7 @@ x_treino, x_teste, y_treino, y_teste = train_test_split(x, y, test_size=0.3, ran
 explicador = lime_tabular.LimeTabularExplainer(
     x_treino.values,  # Dados de treinamento
     feature_names=x.columns,  # Nomes das colunas
-    class_names=['Poor', 'Standard', 'Good'],  # Classes de saída
+    class_names=['Good', 'Poor', 'Standard'],  # Classes de saída
     verbose=True,
     mode='classification'
 )
@@ -108,7 +108,7 @@ with st.expander("Adicionar um novo cliente"):
         dias_atraso = st.number_input("Dias de Atraso", min_value=0, value=0)
         num_pagamentos_atrasados = st.number_input("Número de Pagamentos Atrasados", min_value=0, value=0)
         num_verificacoes_credito = st.number_input("Número de Verificações de Crédito", min_value=0, value=0)
-        mix_credito = st.number_input("Mix de Crédito", min_value=0.0, value=0.0)
+        mix_credito = st.selectbox("Mix de Crédito",["Bom", "Normal", "Ruim"])
         divida_total = st.number_input("Dívida Total", min_value=0.0, value=0.0)
         taxa_uso_credito = st.number_input("Taxa de Uso do Crédito (%)", min_value=0.0, value=0.0)
         idade_historico_credito = st.number_input("Idade do Histórico de Crédito (meses)", min_value=0, value=0)
@@ -160,11 +160,13 @@ with st.expander("Adicionar um novo cliente"):
         
         st.write("### Avaliação do Cliente:")
         st.write(df_novo_cliente)
+        
+        previsao = modelo_arvoredecisao.predict(df_novo_cliente)
 
         st.metric(label="Previsão de Score de Crédito", value=previsao[0])
 
         # Gerar explicação usando LIME
-        explicacao = explicador.explain_instance(df_novo_cliente.iloc[0].values, modelo_arvoredecisao.predict_proba)
+        explicacao = explicador.explain_instance(df_novo_cliente.values[0], modelo_arvoredecisao.predict_proba, num_features = 20, num_samples=10000)
 
         st.write("### Explicação da Previsão com LIME:")
         components.html(explicacao.as_html(), height=500)
