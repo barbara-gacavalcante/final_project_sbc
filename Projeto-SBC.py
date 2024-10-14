@@ -81,8 +81,6 @@ with st.expander("Novas previsões"):
         if novos_clientes[coluna].dtype == "object" and coluna != "score_credito":
             novos_clientes[coluna] = codificador.fit_transform(novos_clientes[coluna])
 
-    st.write(novos_clientes)
-
     previsao = modelo_arvoredecisao.predict(novos_clientes)
     st.write("### Novos Dados dos Clientes Codificados:")
     st.write(novos_clientes)
